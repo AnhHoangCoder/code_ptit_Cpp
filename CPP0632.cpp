@@ -7,70 +7,67 @@
 using namespace std;
 using ll = long long;
 
+class HoaDon;
+
 int idx_kh = 0 , idx_mh = 0 , idx_hd = 0;
 
 class KhachHang{
-    string id , name , gender , date , addr;
+protected:
+    string maKh , tenKh , gender , date , addr;
 public:
-    static KhachHang ds[25];
+    static KhachHang dskh[25];
     static int n;
     friend istream &operator >> (istream &in , KhachHang &a){
         ostringstream tmp;
         tmp << setw(3) << setfill('0') << ++idx_kh;
-        a.id = "KH" + tmp.str();
+        a.maKh = "KH" + tmp.str();
 
         if(in.peek() == '\n') in.ignore();
-        getline(in , a.name);
+        getline(in , a.tenKh);
         in >> a.gender >> a.date;
         in.ignore(numeric_limits<streamsize>::max() , '\n');
         getline(in , a.addr);
 
-        ds[n++] = a;
+        dskh[n++] = a;
         return in;
     }
-    string get_id(){return id;}
-    string get_name(){return name;}
-    string get_addr(){return addr;}
+    string get_id(){return maKh;}
     friend class HoaDon;
 };
-KhachHang KhachHang::ds[25];
+KhachHang KhachHang::dskh[25];
 int KhachHang::n=0;
 
 class MatHang{
-    string id , name , dvt;
+protected:
+    string maMh , tenMh , dvt;
     int buy , pass;
 public:
-    static MatHang ds[45];
+    static MatHang dsmh[45];
     static int n;
     friend istream &operator >> (istream &in , MatHang &a){
         ostringstream tmp;
         tmp << setw(3) << setfill('0') << ++idx_mh;
-        a.id = "MH" + tmp.str();
+        a.maMh = "MH" + tmp.str();
 
         if(in.peek() == '\n') in.ignore();
-        getline(in , a.name);
-        getline(in , a.dvt);
+        getline(in , a.tenMh);
+        in >> a.dvt;
         in >> a.buy >> a.pass;
         in.ignore(numeric_limits<streamsize>::max() , '\n');
 
-        ds[n++] = a;
+        dsmh[n++] = a;
         return in;
     }
-    string get_id(){return id;}
-    string get_name(){return name;}
-    string get_dvt(){return dvt;}
-    int get_buy(){return buy;}
-    int get_pass(){return pass;}
+    string get_id(){return maMh;}
     friend class HoaDon;
 };
-MatHang MatHang::ds[45];
+MatHang MatHang::dsmh[45];
 int MatHang::n=0;
 
-class HoaDon{
+class HoaDon : public KhachHang , public MatHang{
     string id_hd , id_kh , id_mh;
     int sl;
 public:
-    string name_mh;
     ll loi_nhuan;
     friend istream &operator >> (istream &in , HoaDon &a){
         ostringstream tmp;
@@ -78,39 +75,33 @@ public:
         a.id_hd = "HD" + tmp.str();
         in >> a.id_kh >> a.id_mh >> a.sl;
 
-        for(int i=0;i<MatHang::n;i++){
-            if(a.id_mh == MatHang::ds[i].get_id()){
-                a.loi_nhuan = 1LL * a.sl *
-                    (MatHang::ds[i].get_pass() - MatHang::ds[i].get_buy());
+        for(int i=0;i<KhachHang::n;i++){
+            if(KhachHang::dskh[i].get_id() == a.id_kh){
+                (KhachHang&)a = KhachHang::dskh[i];
                 break;
             }
         }
+
+        for(int i=0;i<MatHang::n;i++){
+            if(MatHang::dsmh[i].get_id() == a.id_mh){
+                (MatHang&)a = MatHang::dsmh[i];
+                break;
+            }
+        }
+
+        a.loi_nhuan = 1LL * a.sl * (a.pass - a.buy);
         return in;
     }
     friend ostream &operator << (ostream &out , HoaDon &a){
-        KhachHang kh;
-        MatHang mh;
-        for(int i=0;i<KhachHang::n;i++){
-            if(a.id_kh == KhachHang::ds[i].get_id()) kh = KhachHang::ds[i];
-        }
-        for(int i=0;i<MatHang::n;i++){
-            if(a.id_mh == MatHang::ds[i].get_id()) mh = MatHang::ds[i];
-        }
-        ll sum = 1LL*a.sl*mh.get_pass();
-        out << a.id_hd << " " << kh.get_name() << " " << kh.get_addr()
-            << " " << mh.get_name() << " " << a.sl << " "
+        ll sum = 1LL*a.sl*a.pass;
+        out << a.id_hd << " " << a.tenKh << " " << a.addr
+            << " " << a.tenMh << " " << a.sl << " "
             << sum << " " << a.loi_nhuan << '\n';
         return out;
     }
     friend bool operator < (HoaDon &a,HoaDon &b){
         if(a.loi_nhuan != b.loi_nhuan) return a.loi_nhuan > b.loi_nhuan;
-        for(int i=0;i<MatHang::n;i++){
-            if(a.id_mh == MatHang::ds[i].get_id()) a.name_mh = MatHang::ds[i].get_name();
-        }
-        for(int i=0;i<MatHang::n;i++){
-            if(b.id_mh == MatHang::ds[i].get_id()) b.name_mh = MatHang::ds[i].get_name();
-        }
-        return a.name_mh > b.name_mh;
+        return a.tenMh > b.tenMh;
     }
 };
 
