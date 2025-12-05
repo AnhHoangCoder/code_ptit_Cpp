@@ -4,30 +4,28 @@
 
 using namespace std;
 
-struct SinhVien{
-    string name,lop,date;
+class SinhVien{
+    string id , name , lop , date;
     float gpa;
+public:
     void nhap(){
+        id = "B20DCCN001";
         getline(cin , name);
-        getline(cin , lop);
-        getline(cin , date);
-        cin >> gpa;
-        cin.ignore();
+        cin >> lop >> date >> gpa;
     }
+
     void xuat(){
-        string d,m,y;
+        string d , m , y;
         stringstream ss(date);
-        getline(ss,d,'/');
-        getline(ss,m,'/');
-        getline(ss,y);
+        getline(ss , d , '/');
         if(d.size() == 1) d = "0" + d;
+        getline(ss , m , '/');
         if(m.size() == 1) m = "0" + m;
-        cout << "B20DCCN001" << " " << name << " " <<
-        lop << " " << d << "/" << m << "/" << y <<
-        " " << fixed << setprecision(2) << gpa; 
+        getline(ss , y);
+        cout << id << " " << name << " " << lop << " "
+        << d << "/" << m << "/" << y << " " << fixed << setprecision(2) << gpa << endl;
     }
 };
-
 
 int main(){
     SinhVien a;
