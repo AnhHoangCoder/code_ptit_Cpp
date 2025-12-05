@@ -1,98 +1,108 @@
 #include <iostream>
 #include <iomanip>
-#include <string>
-#include <sstream>
 #include <limits>
+#include <sstream>
 
 using namespace std;
 using ll = long long;
 
-int idxKhachHang = 0 , idxMatHang = 0 , idxHoaDon = 0;
+int idx_kh = 0, idx_mh = 0 , idx_hd = 0;
 
 class HoaDon;
-class KhachHang{
-    string id = "" , name , gender , date , addr;
-public:
-    static KhachHang ds[25];
-    static int n;
 
-    friend istream &operator >> (istream &in , KhachHang &a){
+class KhachHang{
+protected:
+    string maKh , tenKh , gender , date , addr;
+public:
+    static KhachHang dskh[25];
+    static int n;
+    friend istream& operator >> (istream &in , KhachHang &a){
         ostringstream tmp;
-        tmp << setw(3) << setfill('0') << ++idxKhachHang;
-        a.id = "KH" + tmp.str();
-        //loại bỏ \n ở main
+        tmp << setw(3) << setfill('0') << ++idx_kh;
+        a.maKh = "KH" + tmp.str();
         if(in.peek() == '\n') in.ignore();
-        //dùng getline thống nhất để tránh rối loạn cin vs getline
-        getline(in , a.name);
+
+        getline(in , a.tenKh);
         in >> a.gender >> a.date;
         in.ignore(numeric_limits<streamsize>::max() , '\n');
         getline(in , a.addr);
-        ds[n++] = a;
+        dskh[n++] = a;            
         return in;
     }
-    string getID_kh(){ return id;}
-    string getName_kh(){return name;}
-    string getAddr_kh(){return addr;}
+    string get_id(){
+        return maKh;
+    }
     friend class HoaDon;
 };
 
-KhachHang KhachHang::ds[25];
+KhachHang KhachHang::dskh[25];
 int KhachHang::n = 0;
-class MatHang{
-    string id = "", name , dvt;
-    int buy , pass;
-public:
-    static MatHang ds[45];
-    static int n;
 
-    friend istream &operator >> (istream &in , MatHang &a){
+class MatHang{
+protected:
+    string  maMh , tenMh , dvt;
+    ll buy , pass;
+public:
+    static MatHang dsmh[45];
+    static int n;
+    friend istream& operator >> (istream &in , MatHang &a){
         ostringstream tmp;
-        tmp << setw(3) << setfill('0') << ++idxMatHang;
-        a.id = "MH" + tmp.str();
+        tmp << setw(3) << setfill('0') << ++idx_mh;
+        a.maMh = "MH" + tmp.str();
         if(in.peek() == '\n') in.ignore();
-        getline(in , a.name);
+
+        getline(in , a.tenMh);
         in >> a.dvt >> a.buy >> a.pass;
-        in.ignore(numeric_limits<streamsize>::max() , '\n');
-        ds[n++] = a;
+        dsmh[n++] = a;
         return in;
     }
-    string getID_mh(){return id;}
-    string getName_mh(){return name;}
-    string getDVT_mh(){return dvt;}
-    int get_buy(){return buy;}
-    int get_pass(){return pass;}
+    string get_id(){
+        return maMh;
+    }
     friend class HoaDon;
 };
 
-MatHang MatHang::ds[45];
+MatHang MatHang::dsmh[45];
 int MatHang::n = 0;
-class HoaDon{
-    string id_hd = "" , id_kh , id_mh;
+
+class HoaDon : public KhachHang , public MatHang{
+    string maHd;
+    string id_Kh , id_Mh;
     int sl;
 public:
-    friend istream &operator >> (istream &in , HoaDon &a){
+    friend istream& operator >> (istream &in , HoaDon &a){
         ostringstream tmp;
-        tmp << setw(3) << setfill('0') << ++idxHoaDon;
-        a.id_hd = "HD" + tmp.str();
-        in >> a.id_kh >> a.id_mh >> a.sl;
+        tmp << setw(3) << setfill('0') << ++idx_hd;
+        a.maHd = "HD" + tmp.str();
+
+        in >> a.id_Kh >> a.id_Mh >> a.sl;
+
+        for(int i=0;i<KhachHang::n;i++){
+            if(KhachHang::dskh[i].get_id() == a.id_Kh){
+                //ép kiểu hóa đơn về khách hàng và gán bằng đối tượng tìm được
+                //dòng này thay cho việc gán thủ công a.name = ... ,a.addr = 
+                (KhachHang&)a = KhachHang::dskh[i];
+                break;
+            }
+        }
+
+        for(int i=0;i<MatHang::n;i++){
+            if(MatHang::dsmh[i].get_id() == a.id_Mh){
+                (MatHang&)a = MatHang::dsmh[i];
+                break;
+            }
+        }   
         return in;
     }
-    friend ostream &operator << (ostream &out , HoaDon &a){
-        KhachHang *kh = nullptr;
-        MatHang *mh = nullptr;
-        for(int i=0;i<KhachHang::n;i++){
-            if(a.id_kh == KhachHang::ds[i].getID_kh()) kh = &KhachHang::ds[i];
-        }
-        for(int i=0;i<MatHang::n;i++){
-            if(a.id_mh == MatHang::ds[i].getID_mh()) mh = &MatHang::ds[i];
-        }
-        ll sum = 1LL * a.sl * mh->get_pass();
-        out << a.id_hd << " " << kh->getName_kh() << " " << kh->getAddr_kh()
-        << " " << mh->getName_mh() << " " << mh->getDVT_mh() << " " <<
-        mh->get_buy() << " " << mh->get_pass() << " " << a.sl << " " << 
-        sum << endl;
+    friend ostream& operator << (ostream &out , HoaDon &a){
+        ll sum = (ll)a.sl * a.pass;
+        //vì tên biến cha khác nhau nên ta gọi trực tiếp thay vì gọi vi ::
+        out << a.maHd << " " << a.tenKh << " " <<
+        a.addr << " " << a.tenMh << " " << a.dvt << " "
+        << a.buy << " " << a.pass << " " << a.sl << " "
+        << sum << "\n";
         return out;
-    }
+    }  
 };
 
 int main(){

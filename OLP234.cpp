@@ -23,3 +23,12 @@
 // 0
 // Giải thích test 1: Các xâu thu được sau khi xóa bỏ 1 kí tự lần lượt là: bbbcca, abbcca, abbcca, abbcca, abbbca, abbbca, abbbcc.
 // Có 4 cặp chỉ số thỏa mãn là (2, 3), (2, 4), (3, 4) và (5, 6).
+
+#include <iostream>
+
+using namespace std;
+
+int main(){
+    cout << "Yah" <<endl;
+    return 0;
+}
