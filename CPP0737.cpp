@@ -2,14 +2,7 @@
 #include <vector>
 
 using namespace std;
-
-double tb_sum(vector<int> &a , int l , int r){
-    int ans = 0;
-    while(r--){
-        ans += a[l++];
-    }
-    return ans/4.0;
-}
+using db = double;
 
 void test_case(){
     int n,k;
@@ -18,17 +11,26 @@ void test_case(){
     for(int i=0;i<n;i++){
         cin >> a[i];
     }
-    int Max = 0;
-    double Max_value = tb_sum(a,0,k);
+    
+    int sum = 0;
+    for(int i=0;i<n;i++){
+        sum += a[i];
+    }
+    db max_value = sum * 1.0 / k;
+    int max_pos = 0;
+
+    //sliding window
     for(int i=1;i<=n-k;i++){
-        double tmp = tb_sum(a,i,k);
-        if(Max_value < tmp){
-            Max_value = tmp;
-            Max = i;
+        sum = sum - a[i-1] + a[i+k-1];
+        db tmp = sum * 1.0 / k;
+
+        if(tmp > max_value){
+            max_value = tmp;
+            max_pos = i;
         }
     }
-    while(k--){
-        cout << a[Max++] << " ";
+    for(int i=0;i<k;i++){
+        cout << a[max_pos+i] << " ";
     }
     cout << endl;
 }
